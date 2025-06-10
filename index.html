@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GenX Edit - Word Find Game</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f39c12;
+            --background-color: #f5f5f5;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --hover-color: #1a252f;
+            --selected-color: #f39c12;
+            --found-color: #2ecc71;
+            --font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .word-find-widget {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+            padding: 0 15px 15px 15px;
+        }
+
+        .word-find-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 -15px 20px -15px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .word-find-content {
+            padding: 0 20px;
+        }
+
+        .word-find-grid-container {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+            padding: 0 20px;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .word-find-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 2px;
+            margin: 0 auto;
+            user-select: none;
+            position: relative;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .grid-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            box-sizing: border-box;
+        }
+
+        .grid-cell.selected {
+            background-color: var(--selected-color);
+            color: white;
+        }
+
+        .grid-cell.found {
+            background-color: var(--found-color);
+            color: white;
+        }
+
+        .grid-cell.hint {
+            background-color: #ffeb3b;
+            color: #333;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .word-list-container {
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .word-list-item {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            position: relative;
+            background-color: white;
+            text-align: center;
+        }
+
+        .word-list-item.found {
+            text-decoration: line-through;
+            color: var(--found-color);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        .word-find-footer {
+            padding: 15px 20px;
+            text-align: right;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .word-find-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            margin-left: 10px;
+        }
+
+        .word-find-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .word-find-message {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--found-color);
+            display: none;
+        }
+
+        /* Admin controls - hidden by default */
+        .admin-controls {
+            display: none;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .admin-controls h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .admin-control-group {
+            margin-bottom: 15px;
+        }
+
+        .admin-control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .admin-control-group select,
+        .admin-control-group input,
+        .admin-control-group textarea {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            font-size: 14px;
+            width: 100%;
+            max-width: 300px;
+            box-sizing: border-box;
+        }
+
+        .admin-control-group textarea {
+            max-width: 100%;
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .admin-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .custom-words-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .word-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .word-find-grid-container {
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .word-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-cell {
+                font-size: 0.9em;
+            }
+            
+            .word-find-grid-container {
+                padding: 0 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Admin Controls (hidden by default) -->
+        <div class="admin-controls" id="admin-controls">
+            <h3>Admin Controls - Word Find Configuration</h3>
+            
+            <div class="admin-control-group">
+                <label for="admin-category-select">Word Category:</label>
+                <select id="admin-category-select">
+                    <option value="movies1992">June 1992 Movies</option>
+                    <option value="music1992">June 1992 Music</option>
+                    <option value="tv1992">June 1992 TV Shows</option>
+                    <option value="tech1992">1992 Technology</option>
+                    <option value="slang1992">1992 Slang</option>
+                    <option value="custom">Custom Words</option>
+                </select>
+            </div>
+            
+            <div class="admin-control-group" id="custom-words-group" style="display: none;">
+                <label for="admin-custom-words">Custom Words (one per line):</label>
+                <textarea id="admin-custom-words" placeholder="Enter your custom words here, one per line:
+VIOLIN
+CELLO
+VIOLA
+BASS
+MOZART
+BEETHOVEN
+BACH
+STRINGS
+ORCHESTRA
+SYMPHONY"></textarea>
+                <div class="custom-words-help">
+                    Enter 8-12 words, one per line. Words should be 3-12 letters long for best results.
+                </div>
+            </div>
+            
+            <div class="admin-control-group">
+                <label for="admin-show-date">Show Date in Header:</label>
+                <select id="admin-show-date">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+            
+            <div class="admin-buttons">
+                <button id="admin-apply" class="word-find-button">Apply Changes</button>
+                <button id="admin-generate" class="word-find-button">Generate New Puzzle</button>
+            </div>
+        </div>
+
+        <div class="word-find-widget" id="genx-word-find">
+            <div class="word-find-header" id="word-find-header">
+                The GenX Edit: Word Find
+            </div>
+            <div class="word-find-content">
+                <div class="word-find-grid-container">
+                    <div class="word-find-grid" id="word-find-grid"></div>
+                </div>
+                
+                <div class="word-list-container">
+                    <h3>Find These Words:</h3>
+                    <ul class="word-list" id="word-list"></ul>
+                </div>
+                
+                <div class="completion-message" id="completion-message">
+                    Congratulations! You found all the words!
+                </div>
+            </div>
+            <div class="word-find-footer">
+                <div class="word-find-message" id="word-find-message"></div>
+                <div class="button-container" id="button-container">
+                    <button id="hint-button" class="word-find-button">Get Hint</button>
+                    <button id="reset-puzzle" class="word-find-button">Reset Puzzle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simplified word find game for The GenX Edit
+        const wordCategories = {
+            movies1992: ['BATMAN', 'RETURNS', 'SISTER', 'ACT', 'PATRIOT', 'GAMES', 'ALIEN', 'LETHAL', 'WEAPON', 'BASIC'],
+            music1992: ['KRISKROSS', 'JUMP', 'NIRVANA', 'PEARL', 'JAM', 'BOYZ', 'GENESIS', 'COLLINS', 'MADONNA', 'PRINCE'],
+            tv1992: ['MURPHY', 'BROWN', 'CHEERS', 'ROSEANNE', 'SEINFELD', 'SIMPSONS', 'HOMEFRONT', 'NORTHERN', 'EXPOSURE', 'DYNASTY'],
+            tech1992: ['WINDOWS', 'NINTENDO', 'GAMEBOY', 'DISKETTE', 'MODEM', 'MACINTOSH', 'POWERBOOK', 'COMPAQ', 'WALKMAN', 'PAGER'],
+            slang1992: ['PSYCH', 'BOGUS', 'RADICAL', 'FRESH', 'PHAT', 'DUDE', 'WORD', 'HOMEY', 'CHILL', 'WACK'],
+            custom: []
+        };
+        
+        let currentCategory = 'movies1992';
+        let gameGrid = [];
+        let wordsToFind = [];
+        let foundWords = [];
+        let selectedCells = [];
+        let isSelecting = false;
+        const gridSize = 15;
+        
+        // DOM elements
+        const grid = document.getElementById('word-find-grid');
+        const wordList = document.getElementById('word-list');
+        const message = document.getElementById('word-find-message');
+        const completionMsg = document.getElementById('completion-message');
+        const adminControls = document.getElementById('admin-controls');
+        const categorySelect = document.getElementById('admin-category-select');
+        const customWordsTextarea = document.getElementById('admin-custom-words');
+        const customWordsGroup = document.getElementById('custom-words-group');
+        const showDateSelect = document.getElementById('admin-show-date');
+        const header = document.getElementById('word-find-header');
+        
+        // Initialize game
+        function init() {
+            generatePuzzle();
+            setupEventListeners();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('admin-apply').addEventListener('click', applySettings);
+            document.getElementById('admin-generate').addEventListener('click', generatePuzzle);
+            document.getElementById('hint-button').addEventListener('click', showHint);
+            document.getElementById('reset-puzzle').addEventListener('click', resetPuzzle);
+            
+            categorySelect.addEventListener('change', function() {
+                customWordsGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+        }
+        
+        // Apply admin settings
+        function applySettings() {
+            currentCategory = categorySelect.value;
+            
+            if (currentCategory === 'custom') {
+                const customWords = customWordsTextarea.value
+                    .split('\n')
+                    .map(word => word.trim().toUpperCase())
+                    .filter(word => word.length > 0 && word.length <= 12);
+                wordCategories.custom = customWords.slice(0, 10);
+            }
+            
+            // Update header
+            if (showDateSelect.value === 'true') {
+                header.innerHTML = 'The GenX Edit: Word Find<br><span style="font-size: 14px;">Flashback to June 8, 1992</span>';
+            } else {
+                header.innerHTML = 'The GenX Edit: Word Find';
+            }
+            
+            generatePuzzle();
+        }
+        
+        // Generate puzzle
+        function generatePuzzle() {
+            // Reset game state
+            foundWords = [];
+            selectedCells = [];
+            
+            // Get words for current category
+            const words = [...wordCategories[currentCategory]];
+            if (words.length === 0) {
+                alert('Please enter some custom words first!');
+                return;
+            }
+            
+            // Initialize grid
+            gameGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+            wordsToFind = [];
+            
+            // Place words
+            const directions = [
+                [0, 1],   // horizontal
+                [1, 0],   // vertical
+                [1, 1],   // diagonal down-right
+                [-1, 1]   // diagonal up-right
+            ];
+            
+            words.slice(0, 10).forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                
+                while (!placed && attempts < 100) {
+                    const direction = directions[Math.floor(Math.random() * directions.length)];
+                    const startRow = Math.floor(Math.random() * gridSize);
+                    const startCol = Math.floor(Math.random() * gridSize);
+                    
+                    if (canPlaceWord(word, startRow, startCol, direction)) {
+                        placeWord(word, startRow, startCol, direction);
+                        placed = true;
+                    }
+                    attempts++;
+                }
+            });
+            
+            // Fill empty cells
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (gameGrid[i][j] === '') {
+                        gameGrid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+            
+            renderGrid();
+            renderWordList();
+            updateMessage();
+        }
+        
+        // Check if word can be placed
+        function canPlaceWord(word, row, col, direction) {
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + direction[0] * i;
+                const newCol = col + direction[1] * i;
+                
+                if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
+                    return false;
+                }
+                
+                if (gameGrid[newRow][newCol] !== '' && gameGrid[newRow][newCol] !== word[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Place word in grid
+        function placeWord(word, row, col, direction) {
+            const positions = [];
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + direction[0] * i;
+                const newCol = col + direction[1] * i;
+                gameGrid[newRow][newCol] = word[i];
+                positions.push([newRow, newCol]);
+            }
+            wordsToFind.push({ word, positions });
+        }
+        
+        // Render grid
+        function renderGrid() {
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = gameGrid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    cell.addEventListener('mousedown', startSelection);
+                    cell.addEventListener('mouseenter', continueSelection);
+                    cell.addEventListener('mouseup', endSelection);
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+        
+        // Render word list
+        function renderWordList() {
+            wordList.innerHTML = '';
+            wordsToFind.forEach(wordObj => {
+                const li = document.createElement('li');
+                li.className = 'word-list-item';
+                li.textContent = wordObj.word;
+                if (foundWords.includes(wordObj.word)) {
+                    li.classList.add('found');
+                }
+                wordList.appendChild(li);
+            });
+        }
+        
+        // Update message
+        function updateMessage() {
+            const foundCount = foundWords.length;
+            const totalCount = wordsToFind.length;
+            
+            if (foundCount === totalCount && totalCount > 0) {
+                message.textContent = '';
+                completionMsg.style.display = 'block';
+            } else {
+                message.textContent = `Found ${foundCount} of ${totalCount} words`;
+                completionMsg.style.display = 'none';
+            }
+        }
+        
+        // Selection handlers
+        function startSelection(e) {
+            e.preventDefault();
+            isSelecting = true;
+            selectedCells = [e.target];
+            e.target.classList.add('selected');
+        }
+        
+        function continueSelection(e) {
+            if (!isSelecting) return;
+            
+            document.querySelectorAll('.grid-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            const startCell = selectedCells[0];
+            const cells = getCellsBetween(startCell, e.target);
+            cells.forEach(cell => cell.classList.add('selected'));
+            selectedCells = cells;
+        }
+        
+        function endSelection() {
+            if (!isSelecting) return;
+            
+            isSelecting = false;
+            checkSelectedWord();
+            
+            document.querySelectorAll('.grid-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            selectedCells = [];
+        }
+        
+        // Get cells between two points
+        function getCellsBetween(startCell, endCell) {
+            const startRow = parseInt(startCell.dataset.row);
+            const startCol = parseInt(startCell.dataset.col);
+            const endRow = parseInt(endCell.dataset.row);
+            const endCol = parseInt(endCell.dataset.col);
+            
+            const cells = [];
+            const rowDiff = endRow - startRow;
+            const colDiff = endCol - startCol;
+            
+            if (rowDiff === 0 || colDiff === 0 || Math.abs(rowDiff) === Math.abs(colDiff)) {
+                const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+                const rowStep = steps === 0 ? 0 : rowDiff / steps;
+                const colStep = steps === 0 ? 0 : colDiff / steps;
+                
+                for (let i = 0; i <= steps; i++) {
+                    const row = startRow + Math.round(rowStep * i);
+                    const col = startCol + Math.round(colStep * i);
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) cells.push(cell);
+                }
+            }
+            
+            return cells;
+        }
+        
+        // Check selected word
+        function checkSelectedWord() {
+            if (selectedCells.length < 2) return;
+            
+            const selectedWord = selectedCells.map(cell => cell.textContent).join('');
+            const reversedWord = selectedWord.split('').reverse().join('');
+            
+            for (const wordObj of wordsToFind) {
+                if ((wordObj.word === selectedWord || wordObj.word === reversedWord) && 
+                    !foundWords.includes(wordObj.word)) {
+                    
+                    foundWords.push(wordObj.word);
+                    selectedCells.forEach(cell => cell.classList.add('found'));
+                    renderWordList();
+                    updateMessage();
+                    break;
+                }
+            }
+        }
+        
+        // Show hint
+        function showHint() {
+            const unfoundWords = wordsToFind.filter(wordObj => !foundWords.includes(wordObj.word));
+            if (unfoundWords.length === 0) return;
+            
+            const randomWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
+            const firstPos = randomWord.positions[0];
+            const cell = document.querySelector(`[data-row="${firstPos[0]}"][data-col="${firstPos[1]}"]`);
+            
+            if (cell) {
+                cell.classList.add('hint');
+                message.textContent = `Hint: Look for "${randomWord.word}"`;
+                setTimeout(() => {
+                    cell.classList.remove('hint');
+                    updateMessage();
+                }, 3000);
+            }
+        }
+        
+        // Reset puzzle
+        function resetPuzzle() {
+            foundWords = [];
+            document.querySelectorAll('.grid-cell.found').forEach(cell => {
+                cell.classList.remove('found');
+            });
+            renderWordList();
+            updateMessage();
+        }
+        
+        // Global function to toggle admin mode
+        window.toggleAdminMode = function() {
+            adminControls.style.display = adminControls.style.display === 'none' ? 'block' : 'none';
+            if (categorySelect.value === 'custom') {
+                customWordsGroup.style.display = 'block';
+            }
+        };
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
