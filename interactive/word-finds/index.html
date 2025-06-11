@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The GenX Edit: Word Find</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      display: block;
+    }
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(12, 40px);
+      grid-gap: 4px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      text-align: center;
+      line-height: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .selected {
+      background-color: #cde;
+    }
+    .found {
+      background-color: #aef;
+    }
+    #word-list {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #word-list span {
+      margin: 0 10px;
+      font-size: 16px;
+    }
+    #word-list .found-word {
+      text-decoration: line-through;
+      color: #999;
+    }
+    #controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #admin-panel {
+      display: none;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<h1 id="game-title">The GenX Edit: Word Find</h1>
+<div id="puzzle"></div>
+<div id="word-list"></div>
+<div id="controls">
+  <button onclick="highlightHint()">Get Hint</button>
+  <button onclick="initPuzzle()">Reset Puzzle</button>
+</div>
+
+<div id="admin-panel">
+  <h2>Admin Panel</h2>
+  <form id="admin-form">
+    <label>Theme:</label>
+    <select id="theme">
+      <option>Standard</option>
+      <option>80s</option>
+      <option>90s</option>
+      <option>Business</option>
+    </select><br>
+    <label>Category:</label>
+    <select id="category">
+      <option>Movies</option>
+      <option>Music</option>
+      <option>TV</option>
+      <option>Society & Culture</option>
+    </select><br>
+    <label>Month:</label>
+    <select id="month">
+      <option>January</option><option>February</option><option>March</option><option>April</option>
+      <option>May</option><option>June</option><option>July</option><option>August</option>
+      <option>September</option><option>October</option><option>November</option><option>December</option>
+    </select><br>
+    <label>Year:</label>
+    <select id="year">
+      <!-- Dynamically fill from 1970 to 2000 -->
+    </select><br>
+    <label>Custom Words (comma-separated):</label><br>
+    <textarea id="words" rows="4" cols="50"></textarea><br>
+    <input type="checkbox" id="toggleTitle" onchange="document.getElementById('game-title').style.display = this.checked ? 'none' : 'block';"> Hide Title<br>
+    <button type="button" onclick="generateCustomPuzzle()">Generate Puzzle</button>
+  </form>
+</div>
+
+<script>
+  const defaultWords = ['GENX', 'RADIO', 'WALKMAN', 'BOOMBOX', 'MTV', 'CASSETTE', 'REWIND', 'VHS', 'FADS', 'TAPE'];
+  const gridSize = 12;
+  let puzzleGrid = [];
+  let selectedPath = [];
+  let wordsInPuzzle = [];
+
+  const yearSelect = document.getElementById("year");
+  for (let y = 1970; y <= 2000; y++) {
+    let opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+  }
+
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+
+  function showAdminPanel() {
+    if (getQueryParam("admin") === "1") {
+      document.getElementById("admin-panel").style.display = "block";
+    }
+  }
+
+  function initPuzzle(words = defaultWords) {
+    puzzleGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+    wordsInPuzzle = words.map(w => w.toUpperCase());
+    selectedPath = [];
+    const directions = ['horizontal', 'horizontal-reverse'];
+
+    wordsInPuzzle.forEach(word => {
+      let placed = false;
+      while (!placed) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        const row = Math.floor(Math.random() * gridSize);
+        const col = dir === 'horizontal' ? Math.floor(Math.random() * (gridSize - word.length)) :
+                    Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
+
+        if (canPlaceWord(word, row, col, dir)) {
+          placeWord(word, row, col, dir);
+          placed = true;
+        }
+      }
+    });
+
+    fillEmptySpaces();
+    renderGrid();
+    renderWordList(wordsInPuzzle);
+  }
+
+  function canPlaceWord(word, row, col, dir) {
+    for (let i = 0; i < word.length; i++) {
+      let r = row;
+      let c = dir === 'horizontal' ? col + i : col - i;
+      if (c < 0 || c >= gridSize || (puzzleGrid[r][c] && puzzleGrid[r][c] !== word[i])) return false;
+    }
+    return true;
+  }
+
+  function placeWord(word, row, col, dir) {
+    for (let i = 0; i < word.length; i++) {
+      let r = row;
+      let c = dir === 'horizontal' ? col + i : col - i;
+      puzzleGrid[r][c] = word[i];
+    }
+  }
+
+  function fillEmptySpaces() {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        if (!puzzleGrid[r][c]) {
+          puzzleGrid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+        }
+      }
+    }
+  }
+
+  function renderGrid() {
+    const puzzleEl = document.getElementById('puzzle');
+    puzzleEl.innerHTML = '';
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = puzzleGrid[r][c];
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        cell.addEventListener('mousedown', startSelect);
+        cell.addEventListener('mouseenter', extendSelect);
+        cell.addEventListener('mouseup', endSelect);
+        puzzleEl.appendChild(cell);
+      }
+    }
+  }
+
+  function renderWordList(words) {
+    const listEl = document.getElementById('word-list');
+    listEl.innerHTML = '<strong>Words to Find:</strong><br>';
+    words.forEach(word => {
+      const span = document.createElement('span');
+      span.id = 'word-' + word;
+      span.textContent = word;
+      listEl.appendChild(span);
+    });
+  }
+
+  let selecting = false;
+
+  function startSelect(e) {
+    selecting = true;
+    selectedPath = [e.target];
+    e.target.classList.add('selected');
+  }
+
+  function extendSelect(e) {
+    if (selecting && !selectedPath.includes(e.target)) {
+      selectedPath.push(e.target);
+      e.target.classList.add('selected');
+    }
+  }
+
+  function endSelect() {
+    selecting = false;
+    const selectedWord = selectedPath.map(cell => cell.textContent).join('');
+    const reversed = selectedWord.split('').reverse().join('');
+    const found = wordsInPuzzle.find(word => word === selectedWord || word === reversed);
+    if (found) {
+      selectedPath.forEach(cell => {
+        cell.classList.remove('selected');
+        cell.classList.add('found');
+      });
+      document.getElementById('word-' + found).classList.add('found-word');
+    } else {
+      selectedPath.forEach(cell => cell.classList.remove('selected'));
+    }
+    selectedPath = [];
+  }
+
+  function highlightHint() {
+    alert("Hint: Try looking for the first or last letters of any word in the list.");
+  }
+
+  function generateCustomPuzzle() {
+    const wordInput = document.getElementById('words').value;
+    const customWords = wordInput.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
+    if (customWords.length > 0) {
+      initPuzzle(customWords);
+    } else {
+      alert('Please enter at least one word.');
+    }
+  }
+
+  showAdminPanel();
+  initPuzzle();
+</script>
+
+</body>
+</html>
