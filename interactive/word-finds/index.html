@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The GenX Edit Word Find</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #puzzle {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-gap: 5px;
+            justify-content: center;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #word-list {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #word-list span {
+            margin: 0 10px;
+            font-size: 16px;
+        }
+        /* Hidden admin panel styles */
+        #admin-panel {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>The GenX Edit Word Find</h1>
+<div id="puzzle"></div>
+<div id="word-list"></div>
+
+<!-- Hidden admin panel for customization -->
+<div id="admin-panel">
+    <h2>Admin Panel</h2>
+    <form id="admin-form">
+        <label for="year">Year:</label><input type="text" id="year" name="year"><br>
+        <label for="month">Month:</label><input type="text" id="month" name="month"><br>
+        <label for="theme">Theme:</label><input type="text" id="theme" name="theme"><br>
+        <label for="category">Category:</label><input type="text" id="category" name="category"><br>
+        <label for="words">Words (comma-separated):</label><br>
+        <textarea id="words" name="words" rows="4" cols="50"></textarea><br>
+        <button type="button" onclick="generateCustomPuzzle()">Generate Puzzle</button>
+    </form>
+</div>
+
+<script>
+    const defaultWords = ['TAPE', 'MIX', 'GENX', 'VHS', 'REWIND', 'BOOMBOX', 'RADIO', 'WALKMAN', 'MTV', 'FADS'];
+    const gridSize = 10;
+    let puzzleGrid = [];
+
+    function initPuzzle(words = defaultWords) {
+        puzzleGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+        const directions = ['horizontal', 'vertical'];
+
+        words.forEach(word => {
+            let placed = false;
+            while (!placed) {
+                const dir = directions[Math.floor(Math.random() * directions.length)];
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+
+                if (canPlaceWord(word, row, col, dir)) {
+                    placeWord(word, row, col, dir);
+                    placed = true;
+                }
+            }
+        });
+
+        fillEmptySpaces();
+        renderGrid();
+        renderWordList(words);
+    }
+
+    function canPlaceWord(word, row, col, dir) {
+        if (dir === 'horizontal' && col + word.length > gridSize) return false;
+        if (dir === 'vertical' && row + word.length > gridSize) return false;
+
+        for (let i = 0; i < word.length; i++) {
+            let r = row + (dir === 'vertical' ? i : 0);
+            let c = col + (dir === 'horizontal' ? i : 0);
+            if (puzzleGrid[r][c] && puzzleGrid[r][c] !== word[i]) return false;
+        }
+        return true;
+    }
+
+    function placeWord(word, row, col, dir) {
+        for (let i = 0; i < word.length; i++) {
+            let r = row + (dir === 'vertical' ? i : 0);
+            let c = col + (dir === 'horizontal' ? i : 0);
+            puzzleGrid[r][c] = word[i];
+        }
+    }
+
+    function fillEmptySpaces() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let row = 0; row < gridSize; row++) {
+            for (let col = 0; col < gridSize; col++) {
+                if (!puzzleGrid[row][col]) {
+                    puzzleGrid[row][col] = alphabet[Math.floor(Math.random() * alphabet.length)];
+                }
+            }
+        }
+    }
+
+    function renderGrid() {
+        const puzzleEl = document.getElementById('puzzle');
+        puzzleEl.innerHTML = '';
+        puzzleGrid.forEach(row => {
+            row.forEach(letter => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = letter;
+                puzzleEl.appendChild(cell);
+            });
+        });
+    }
+
+    function renderWordList(words) {
+        const listEl = document.getElementById('word-list');
+        listEl.innerHTML = '<strong>Words to Find:</strong><br>';
+        words.forEach(word => {
+            const span = document.createElement('span');
+            span.textContent = word;
+            listEl.appendChild(span);
+        });
+    }
+
+    function generateCustomPuzzle() {
+        const wordsInput = document.getElementById('words').value;
+        const customWords = wordsInput.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
+        if (customWords.length > 0) {
+            initPuzzle(customWords);
+        } else {
+            alert('Please enter at least one word.');
+        }
+    }
+
+    // Initialize the default puzzle
+    initPuzzle();
+</script>
+
+</body>
+</html>
