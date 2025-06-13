@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The GenX Edit: Word Find</title>
   <style>
     body {
@@ -11,15 +12,19 @@
       margin: 0;
     }
     
+    
     .word-find-container {
+      width: 95%;
       max-width: 800px;
       margin: 0 auto;
       background-color: #f8f8f8;
       border: 3px solid #000000;
       border-radius: 10px;
-      padding: 30px;
+      padding: 5vw;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-sizing: border-box;
     }
+
     
     h1 {
       text-align: center;
@@ -38,19 +43,24 @@
       margin-bottom: 30px;
     }
     
+    
     .cell {
-      width: 40px;
-      height: 40px;
+      width: 7vw;
+      height: 7vw;
+      max-width: 40px;
+      max-height: 40px;
       background-color: #fff;
       border: 2px solid #333;
       text-align: center;
-      line-height: 36px;
+      line-height: 7vw;
       font-weight: bold;
       cursor: pointer;
       user-select: none;
       transition: all 0.3s ease;
-      font-size: 16px;
+      font-size: 4vw;
+      max-font-size: 16px;
     }
+
     
     .cell:hover {
       background-color: #f0f0f0;
@@ -209,12 +219,24 @@
         grid-template-columns: repeat(12, 30px);
       }
       
-      .cell {
-        width: 30px;
-        height: 30px;
-        line-height: 26px;
-        font-size: 14px;
-      }
+      
+    .cell {
+      width: 7vw;
+      height: 7vw;
+      max-width: 40px;
+      max-height: 40px;
+      background-color: #fff;
+      border: 2px solid #333;
+      text-align: center;
+      line-height: 7vw;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      font-size: 4vw;
+      max-font-size: 16px;
+    }
+
     }
     
     @media (max-width: 480px) {
