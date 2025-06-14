@@ -250,6 +250,7 @@
 
 <div class="word-find-container">
   <h1 id="game-title">The GenX Edit: Word Find</h1>
+<p id="game-subhead">Flashback Word Puzzle</p>
   
   <div id="puzzle"></div>
   
@@ -267,7 +268,18 @@
     <button onclick="initPuzzle()">Reset Puzzle</button>
   </div>
 
-  <div id="admin-panel">
+  
+    <button id="admin-toggle" style="display:none; margin-top:20px;" onclick="toggleAdminPanel()">Show/Hide Admin Panel</button>
+    <div id="admin-panel" style="display:none;">
+      <div class="admin-section">
+        <h3>Header & Subheading</h3>
+        <label>Header:</label><br>
+        <input type="text" id="custom-header" placeholder="Enter custom header" style="width: 100%; padding: 6px;"><br>
+        <label>Subheading:</label><br>
+        <input type="text" id="custom-subheading" placeholder="Enter custom subheading" style="width: 100%; padding: 6px;"><br>
+        <button type="button" onclick="updateHeader()">Apply Header</button>
+      </div>
+    
     <h2>Admin Panel</h2>
     
     <div class="admin-section">
@@ -354,7 +366,27 @@
   let foundWords = [];
   let wordPositions = {}; // Store positions of each word for hint system
 
-  // Initialize year dropdown
+  
+  function toggleAdminPanel() {
+    const panel = document.getElementById("admin-panel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+
+  function updateHeader() {
+    const newHeader = document.getElementById("custom-header").value;
+    const newSub = document.getElementById("custom-subheading").value;
+    if (newHeader) document.getElementById("game-title").textContent = newHeader;
+    if (newSub) document.getElementById("game-subhead").textContent = newSub;
+  }
+
+  if (getQueryParam("admin") === "1") {
+    document.getElementById("admin-toggle").style.display = "block";
+    document.getElementById("admin-panel").style.display = "block";
+    generateEmbedCode();
+  }
+
+  // Initialize
+     year dropdown
   const yearSelect = document.getElementById("year");
   for (let y = 1970; y <= 2000; y++) {
     let opt = document.createElement("option");
@@ -662,7 +694,18 @@
   function generateEmbedCode() {
     const currentHTML = document.documentElement.outerHTML;
     // Remove admin panel from embed code
-    const embedHTML = currentHTML.replace(/<div id="admin-panel">[\s\S]*?<\/div>/, '');
+    const embedHTML = currentHTML.replace(/
+    <button id="admin-toggle" style="display:none; margin-top:20px;" onclick="toggleAdminPanel()">Show/Hide Admin Panel</button>
+    <div id="admin-panel" style="display:none;">
+      <div class="admin-section">
+        <h3>Header & Subheading</h3>
+        <label>Header:</label><br>
+        <input type="text" id="custom-header" placeholder="Enter custom header" style="width: 100%; padding: 6px;"><br>
+        <label>Subheading:</label><br>
+        <input type="text" id="custom-subheading" placeholder="Enter custom subheading" style="width: 100%; padding: 6px;"><br>
+        <button type="button" onclick="updateHeader()">Apply Header</button>
+      </div>
+    [\s\S]*?<\/div>/, '');
     document.getElementById('embed-code').value = embedHTML;
   }
 
@@ -678,7 +721,27 @@
     showAdminPanel();
   }
 
+  
+  function toggleAdminPanel() {
+    const panel = document.getElementById("admin-panel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+
+  function updateHeader() {
+    const newHeader = document.getElementById("custom-header").value;
+    const newSub = document.getElementById("custom-subheading").value;
+    if (newHeader) document.getElementById("game-title").textContent = newHeader;
+    if (newSub) document.getElementById("game-subhead").textContent = newSub;
+  }
+
+  if (getQueryParam("admin") === "1") {
+    document.getElementById("admin-toggle").style.display = "block";
+    document.getElementById("admin-panel").style.display = "block";
+    generateEmbedCode();
+  }
+
   // Initialize
+    
   initPuzzle();
   generateEmbedCode();
 </script>
