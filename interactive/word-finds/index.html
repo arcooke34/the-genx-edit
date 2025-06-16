@@ -44,22 +44,21 @@
     }
     
     
-    .cell {
-      width: 7vw;
-      height: 7vw;
-      max-width: 40px;
-      max-height: 40px;
-      background-color: #fff;
-      border: 2px solid #333;
-      text-align: center;
-      line-height: 7vw;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.3s ease;
-      font-size: 4vw;
-      max-font-size: 16px;
-    }
+    
+.cell {
+  background-color: #fff;
+  border: 2px solid #333;
+  font-weight: bold;
+  user-select: none;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
 
     
     .cell:hover {
@@ -118,15 +117,12 @@
       transition: all 0.3s ease;
     }
     
-    
-.word-item.found-word {
-  text-decoration: line-through;
-  background: none;
-  color: #999;
-  border-color: #ccc;
-  font-weight: normal;
-}
-
+    .word-item.found-word {
+      text-decoration: line-through;
+      background-color: #32CD32;
+      color: white;
+      border-color: #228B22;
+    }
     
     #controls {
       text-align: center;
@@ -223,22 +219,21 @@
       }
       
       
-    .cell {
-      width: 7vw;
-      height: 7vw;
-      max-width: 40px;
-      max-height: 40px;
-      background-color: #fff;
-      border: 2px solid #333;
-      text-align: center;
-      line-height: 7vw;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.3s ease;
-      font-size: 4vw;
-      max-font-size: 16px;
-    }
+    
+.cell {
+  background-color: #fff;
+  border: 2px solid #333;
+  font-weight: bold;
+  user-select: none;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
 
     }
     
@@ -616,7 +611,7 @@
       foundWords.push(found);
       selectedPath.forEach(cell => {
         cell.classList.remove('selected');
-        cell.classList.add("found"); cell.style.backgroundColor = "#eefcde";
+        cell.classList.add('found');
       });
       document.getElementById('word-' + found).classList.add('found-word');
       checkGameCompletion();
