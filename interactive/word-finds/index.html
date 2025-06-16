@@ -118,12 +118,15 @@
       transition: all 0.3s ease;
     }
     
-    .word-item.found-word {
-      text-decoration: line-through;
-      background-color: #32CD32;
-      color: white;
-      border-color: #228B22;
-    }
+    
+.word-item.found-word {
+  text-decoration: line-through;
+  background: none;
+  color: #999;
+  border-color: #ccc;
+  font-weight: normal;
+}
+
     
     #controls {
       text-align: center;
@@ -613,7 +616,7 @@
       foundWords.push(found);
       selectedPath.forEach(cell => {
         cell.classList.remove('selected');
-        cell.classList.add('found');
+        cell.classList.add("found"); cell.style.backgroundColor = "#eefcde";
       });
       document.getElementById('word-' + found).classList.add('found-word');
       checkGameCompletion();
