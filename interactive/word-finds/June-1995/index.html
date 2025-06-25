@@ -308,9 +308,10 @@
       <label>Custom Words:</label><br>
       <textarea id="words" rows="4" cols="50" placeholder="Enter words separated by commas (e.g., WORD1, WORD2, WORD3)"></textarea><br>
       <button type="button" onclick="generateCustomPuzzle()">Generate Custom Puzzle</button>
-          <button onclick="downloadConfig()">Download Puzzle</button>
     </div>
-
+<button onclick="downloadConfig()">Download Puzzle</button>
+</div>
+  
     <div class="admin-section">
       <h3>Newsletter Embed Code</h3>
       <p>Copy and paste this code into your newsletter:</p>
@@ -684,7 +685,7 @@
   // Initialize
   initPuzzle();
   generateEmbedCode();
-  function downloadConfig() {
+ function downloadConfig() {
   const config = {
     theme: document.getElementById("themeSelect")?.value || "",
     category: document.getElementById("categorySelect")?.value || "",
@@ -702,6 +703,7 @@
   link.download = `wordfind-${config.category}-${config.year}.json`;
   link.click();
 }
+
 
 </script>
 
