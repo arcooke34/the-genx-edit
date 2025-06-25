@@ -686,12 +686,21 @@
   initPuzzle();
   generateEmbedCode();
 function downloadConfig() {
+  const getValue = (id) => {
+    const el = document.getElementById(id);
+    if (!el) {
+      console.error(`Missing element with id="${id}"`);
+      return "";
+    }
+    return el.value;
+  };
+
   const config = {
-    theme: document.getElementById("theme")?.value || "",
-    category: document.getElementById("category")?.value || "",
-    month: document.getElementById("month")?.value || "",
-    year: document.getElementById("year")?.value || "",
-    words: document.getElementById("words").value
+    theme: getValue("theme"),
+    category: getValue("category"),
+    month: getValue("month"),
+    year: getValue("year"),
+    words: getValue("words")
       .split(',')
       .map(w => w.trim().toUpperCase())
       .filter(w => w.length > 0)
