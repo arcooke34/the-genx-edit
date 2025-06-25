@@ -308,6 +308,7 @@
       <label>Custom Words:</label><br>
       <textarea id="words" rows="4" cols="50" placeholder="Enter words separated by commas (e.g., WORD1, WORD2, WORD3)"></textarea><br>
       <button type="button" onclick="generateCustomPuzzle()">Generate Custom Puzzle</button>
+          <button onclick="downloadConfig()">Download Puzzle</button>
     </div>
 
     <div class="admin-section">
@@ -683,6 +684,25 @@
   // Initialize
   initPuzzle();
   generateEmbedCode();
+  function downloadConfig() {
+  const config = {
+    theme: document.getElementById("themeSelect")?.value || "",
+    category: document.getElementById("categorySelect")?.value || "",
+    month: document.getElementById("monthSelect")?.value || "",
+    year: document.getElementById("yearSelect")?.value || "",
+    words: document.getElementById("customWords").value
+      .split(',')
+      .map(w => w.trim().toUpperCase())
+      .filter(w => w.length > 0)
+  };
+
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `wordfind-${config.category}-${config.year}.json`;
+  link.click();
+}
+
 </script>
 
 </body>
