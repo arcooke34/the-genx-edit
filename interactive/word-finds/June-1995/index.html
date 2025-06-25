@@ -685,13 +685,13 @@
   // Initialize
   initPuzzle();
   generateEmbedCode();
- function downloadConfig() {
+function downloadConfig() {
   const config = {
     theme: document.getElementById("theme")?.value || "",
     category: document.getElementById("category")?.value || "",
     month: document.getElementById("month")?.value || "",
     year: document.getElementById("year")?.value || "",
-    words: document.getElementById("customWords").value
+    words: document.getElementById("words").value
       .split(',')
       .map(w => w.trim().toUpperCase())
       .filter(w => w.length > 0)
@@ -702,6 +702,8 @@
   link.href = URL.createObjectURL(blob);
   link.download = `wordfind-${config.category}-${config.year}.json`;
   link.click();
+}
+
 }
 
 
