@@ -687,10 +687,10 @@
   generateEmbedCode();
  function downloadConfig() {
   const config = {
-    theme: document.getElementById("themeSelect")?.value || "",
-    category: document.getElementById("categorySelect")?.value || "",
-    month: document.getElementById("monthSelect")?.value || "",
-    year: document.getElementById("yearSelect")?.value || "",
+    theme: document.getElementById("theme")?.value || "",
+    category: document.getElementById("category")?.value || "",
+    month: document.getElementById("month")?.value || "",
+    year: document.getElementById("year")?.value || "",
     words: document.getElementById("customWords").value
       .split(',')
       .map(w => w.trim().toUpperCase())
@@ -703,6 +703,7 @@
   link.download = `wordfind-${config.category}-${config.year}.json`;
   link.click();
 }
+
 
 
 </script>
