@@ -1,725 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
   <title>The GenX Edit: Word Find</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #ffffff;
-      padding: 20px;
+      font-family: Arial, sans-serif;
       margin: 0;
+      padding: 1rem;
+      background-color: #f7f7f7;
     }
-    
-    
-    .word-find-container {
-      width: 95%;
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #f8f8f8;
-      border: 3px solid #000000;
-      border-radius: 10px;
-      padding: 5vw;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-
-    
-    h1 {
+    h1, h2 {
       text-align: center;
-      display: block;
-      color: #333;
-      margin-bottom: 30px;
-      font-size: 28px;
-      font-weight: bold;
     }
-    
-    #puzzle {
+    .grid {
       display: grid;
-      grid-template-columns: repeat(12, 40px);
-      grid-gap: 4px;
+      grid-template-columns: repeat(12, 2rem);
       justify-content: center;
-      margin-bottom: 30px;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
     }
-    
-    
-    
-.cell {
-  background-color: #fff;
-  border: 2px solid #333;
-  font-weight: bold;
-  user-select: none;
-  font-size: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-}
-
-
-    
-    .cell:hover {
-      background-color: #f0f0f0;
+    .cell {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      background-color: white;
+      font-weight: bold;
+      user-select: none;
     }
-    
-    .selected {
-      background-color: #90EE90;
-      border-color: #228B22;
+    .word-list {
+      text-align: center;
+      margin-top: 1rem;
     }
-    
+    .admin-panel {
+      display: none;
+      margin-top: 2rem;
+      background: #eee;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
     .found {
-      background-color: #32CD32;
-      color: white;
-      border-color: #228B22;
-    }
-    
-    .hint {
-      background-color: #ffff00;
-      animation: glow 3s ease-in-out;
-    }
-    
-    @keyframes glow {
-      0% { background-color: #ffff00; }
-      50% { background-color: #ffff88; }
-      100% { background-color: #fff; }
-    }
-    
-    #word-list {
-      text-align: center;
-      margin: 30px 0;
-    }
-    
-    #word-list h3 {
-      color: #333;
-      margin-bottom: 20px;
-      font-size: 20px;
-    }
-    
-    .words-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    
-    .word-item {
-      padding: 12px;
-      background-color: #fff;
-      border: 2px solid #333;
-      border-radius: 5px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      transition: all 0.3s ease;
-    }
-    
-    .word-item.found-word {
+      color: gray;
       text-decoration: line-through;
-      background-color: #32CD32;
-      color: white;
-      border-color: #228B22;
-    }
-    
-    #controls {
-      text-align: center;
-      margin-top: 30px;
-    }
-    
-    button {
-      padding: 12px 24px;
-      margin: 0 10px;
-      cursor: pointer;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-    
-    button:hover {
-      background-color: #555;
-    }
-    
-    .success-message {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      margin: 20px 0;
-      background-color: #32CD32;
-      color: white;
-      border-radius: 10px;
-      font-size: 24px;
-      font-weight: bold;
-      border: 3px solid #228B22;
-    }
-    
-    #admin-panel {
-      display: none;
-      margin-top: 30px;
-      background-color: #e8e8e8;
-      padding: 20px;
-      border-radius: 8px;
-      border: 2px solid #333;
-    }
-    
-    #admin-panel label {
-      display: inline-block;
-      width: 120px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-    
-    #admin-panel select, #admin-panel textarea {
-      margin-bottom: 10px;
-      margin-right: 10px;
-      padding: 8px;
-      border: 2px solid #333;
-      border-radius: 4px;
-    }
-    
-    #embed-code {
-      width: 100%;
-      height: 100px;
-      font-family: monospace;
-      font-size: 12px;
-      margin-top: 10px;
-      padding: 10px;
-      border: 2px solid #333;
-      border-radius: 4px;
-    }
-    
-    .admin-section {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f8f8f8;
-      border-radius: 5px;
-      border: 1px solid #333;
-    }
-    
-    .admin-section h3 {
-      margin-top: 0;
-      color: #333;
-      border-bottom: 2px solid #333;
-      padding-bottom: 10px;
-    }
-    
-    @media (max-width: 768px) {
-      .words-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      #puzzle {
-        grid-template-columns: repeat(12, 30px);
-      }
-      
-      
-    
-.cell {
-  background-color: #fff;
-  border: 2px solid #333;
-  font-weight: bold;
-  user-select: none;
-  font-size: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-}
-
-
-    }
-    
-    @media (max-width: 480px) {
-      .words-grid {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
 <body>
+  <h1 id="puzzleTitle">The GenX Edit: Word Find</h1>
+  <h2 id="puzzleSubtitle">Flashback: June 1995 – Culture</h2>
 
-<div class="word-find-container">
-  <h1 id="game-title">The GenX Edit: Word Find</h1>
-  
-  <div id="puzzle"></div>
-  
-  <div id="word-list">
-    <h3>Find These Words:</h3>
-    <div class="words-grid" id="words-grid"></div>
-  </div>
-  
-  <div class="success-message" id="success-message">
-    🎉 Congratulations! You found all of the words! 🎉
-  </div>
-  
-  <div id="controls">
-    <button onclick="highlightHint()">Get Hint</button>
-    <button onclick="initPuzzle()">Reset Puzzle</button>
+  <div class="grid" id="gridContainer"></div>
+
+  <div class="word-list" id="wordList"></div>
+
+  <div class="admin-panel" id="adminPanel">
+    <h3>Admin Panel</h3>
+    <label>Custom Words (comma separated):</label><br>
+    <textarea id="customWords" rows="4" cols="50">NETSCAPE, AOL, EMAIL, PAGERS, TAMAGOTCHI, CHATROOMS, Y2K</textarea><br>
+    <button onclick="applyCustomWords()">Apply Custom Puzzle</button>
   </div>
 
-  <div id="admin-panel">
-    <h2>Admin Panel</h2>
-    
-    <div class="admin-section">
-      <h3>Puzzle Settings</h3>
-      <label>Theme:</label>
-      <select id="theme" onchange="updatePuzzleFromSettings()">
-        <option value="standard">Standard</option>
-        <option value="80s">80s</option>
-        <option value="90s">90s</option>
-        <option value="business">Business</option>
-      </select><br>
-      
-      <label>Category:</label>
-      <select id="category" onchange="updatePuzzleFromSettings()">
-        <option value="movies">Movies</option>
-        <option value="music">Music</option>
-        <option value="tv">TV</option>
-        <option value="culture">Society & Culture</option>
-      </select><br>
-      
-      <label>Month:</label>
-      <select id="month" onchange="updatePuzzleFromSettings()">
-        <option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option>
-        <option value="5">May</option><option value="6" selected>June</option><option value="7">July</option><option value="8">August</option>
-        <option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
-      </select><br>
-      
-      <label>Year:</label>
-      <select id="year" onchange="updatePuzzleFromSettings()">
-        <!-- Dynamically filled -->
-      </select><br>
-      
-      <input type="checkbox" id="toggleTitle" onchange="document.getElementById('game-title').style.display = this.checked ? 'none' : 'block';"> Hide Title<br>
-      
-      <button type="button" onclick="updatePuzzleFromSettings()">Apply Settings</button>
-    </div>
+  <script>
+    const defaultWords = ["NETSCAPE", "AOL", "EMAIL", "PAGERS", "TAMAGOTCHI", "CHATROOMS", "Y2K"];
+    let wordsInPuzzle = [...defaultWords];
 
-    <div class="admin-section">
-      <h3>Custom Words</h3>
-      <label>Custom Words:</label><br>
-      <textarea id="words" rows="4" cols="50" placeholder="Enter words separated by commas (e.g., WORD1, WORD2, WORD3)"></textarea><br>
-      <button type="button" onclick="generateCustomPuzzle()">Generate Custom Puzzle</button>
-    </div>
-<button onclick="downloadConfig()">Download Puzzle</button>
-</div>
-  
-    <div class="admin-section">
-      <h3>Newsletter Embed Code</h3>
-      <p>Copy and paste this code into your newsletter:</p>
-      <textarea id="embed-code" readonly onclick="this.select()"></textarea>
-      <button type="button" onclick="copyEmbedCode()">Copy to Clipboard</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Word databases for different categories and time periods
-  const wordDatabase = {
-    movies: {
-      1995: ['TOY', 'STORY', 'APOLLO', 'THIRTEEN', 'BRAVEHEART', 'CLUELESS', 'CASINO', 'SEVEN', 'BATMAN', 'FOREVER'],
-      1992: ['BATMAN', 'RETURNS', 'SISTER', 'ACT', 'PATRIOT', 'GAMES', 'ALIEN', 'LETHAL', 'WEAPON', 'BASIC'],
-      1991: ['SILENCE', 'LAMBS', 'BEAUTY', 'BEAST', 'ROBIN', 'HOOD', 'POINT', 'BREAK', 'CITY', 'SLICKERS'],
-      1990: ['GHOST', 'PRETTY', 'WOMAN', 'GOODFELLAS', 'DANCES', 'WOLVES', 'TOTAL', 'RECALL', 'DICK', 'TRACY']
-    },
-    music: {
-      1995: ['ALANIS', 'MORISSETTE', 'SEAL', 'KISS', 'ROSE', 'TLC', 'WATERFALLS', 'MONTELL', 'JORDAN', 'THIS', 'HOW', 'DO'],
-      1992: ['NIRVANA', 'PEARL', 'JAM', 'BOYZ', 'GENESIS', 'COLLINS', 'MADONNA', 'PRINCE', 'JUMP', 'KRISS'],
-      1991: ['METALLICA', 'GUNS', 'ROSES', 'QUEEN', 'FREDDIE', 'MERCURY', 'MICHAEL', 'JACKSON', 'WHITNEY', 'HOUSTON'],
-      1990: ['MADONNA', 'VOGUE', 'SINEAD', 'OCONNOR', 'VANILLA', 'ICE', 'HAMMER', 'TIME', 'BELL', 'DEVOE']
-    },
-    tv: {
-      1995: ['FRIENDS', 'SEINFELD', 'ER', 'XFILES', 'FRESH', 'PRINCE', 'SIMPSONS', 'JENNY', 'JONES', 'OPRAH'],
-      1992: ['MURPHY', 'BROWN', 'CHEERS', 'ROSEANNE', 'SEINFELD', 'SIMPSONS', 'HOMEFRONT', 'NORTHERN', 'EXPOSURE', 'DYNASTY'],
-      1991: ['CHEERS', 'MURPHY', 'BROWN', 'ROSEANNE', 'COSBY', 'SHOW', 'GOLDEN', 'GIRLS', 'MACGYVER', 'MATLOCK'],
-      1990: ['CHEERS', 'ROSEANNE', 'COSBY', 'SHOW', 'GOLDEN', 'GIRLS', 'MURPHY', 'BROWN', 'WONDER', 'YEARS']
-    },
-    culture: {
-      1995: ['NETSCAPE', 'AOL', 'EMAIL', 'CHATROOMS', 'BEEPERS', 'PAGERS', 'Y2K', 'FASHION', 'GRUNGE', 'TAMAGOTCHI'],
-      1992: ['GRUNGE', 'SEATTLE', 'FLANNEL', 'DOCS', 'MARTENS', 'SLACKER', 'REALITY', 'BITES', 'ALTERNATIVE', 'ROCK'],
-      1991: ['GULF', 'WAR', 'YELLOW', 'RIBBONS', 'RECESSION', 'ECONOMY', 'SOVIET', 'UNION', 'BERLIN', 'WALL'],
-      1990: ['NELSON', 'MANDELA', 'APARTHEID', 'BERLIN', 'WALL', 'GULF', 'CRISIS', 'RECESSION', 'SAVINGS', 'LOAN']
+    function randomLetter() {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      return alphabet[Math.floor(Math.random() * alphabet.length)];
     }
-  };
 
-  const defaultWords = ['GENX', 'RADIO', 'WALKMAN', 'BOOMBOX', 'MTV', 'CASSETTE', 'REWIND', 'VHS', 'FADS', 'TAPE'];
-  const gridSize = 12;
-  let puzzleGrid = [];
-  let selectedPath = [];
-  let wordsInPuzzle = [];
-  let foundWords = [];
-  let wordPositions = {}; // Store positions of each word for hint system
+    function buildGrid(words, gridSize = 12) {
+      const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(""));
 
-  // Initialize year dropdown
-  const yearSelect = document.getElementById("year");
-  for (let y = 1970; y <= 2000; y++) {
-    let opt = document.createElement("option");
-    opt.value = y;
-    opt.textContent = y;
-    if (y === 1992) opt.selected = true;
-    yearSelect.appendChild(opt);
-  }
-
-  function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
-  }
-
-  function showAdminPanel() {
-    document.getElementById("admin-panel").style.display = "block";
-    generateEmbedCode();
-  }
-
-  function updatePuzzleFromSettings() {
-    const theme = document.getElementById("theme").value;
-    const category = document.getElementById("category").value;
-    const month = parseInt(document.getElementById("month").value);
-    const year = parseInt(document.getElementById("year").value);
-    
-    // Get words based on settings
-    let words = defaultWords;
-    if (wordDatabase[category] && wordDatabase[category][year]) {
-      words = wordDatabase[category][year];
-    }
-    
-    initPuzzle(words);
-    generateEmbedCode();
-  }
-
-  function initPuzzle(words = defaultWords) {
-    puzzleGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
-    wordsInPuzzle = words.map(w => w.toUpperCase()).slice(0, 10); // Limit to 10 words
-    selectedPath = [];
-    foundWords = [];
-    wordPositions = {};
-    
-    // Adjusted directions with much fewer diagonals and backwards
-    const directions = [
-      'horizontal',     // 40% probability
-      'horizontal',     
-      'vertical',       // 40% probability  
-      'vertical',       
-      'diagonal-down-right', // 15% probability
-      'horizontal-reverse',  // 3% probability
-      'vertical-reverse',    // 2% probability
-    ];
-
-    // Place words with better distribution
-    wordsInPuzzle.forEach((word, index) => {
-      let placed = false;
-      let attempts = 0;
-      
-      while (!placed && attempts < 100) {
-        const dir = directions[Math.floor(Math.random() * directions.length)];
-        const position = getRandomPosition(word.length, dir);
-        
-        if (position && canPlaceWord(word, position.row, position.col, dir)) {
-          placeWord(word, position.row, position.col, dir);
-          placed = true;
+      // Place words horizontally
+      words.forEach(word => {
+        const row = Math.floor(Math.random() * gridSize);
+        const maxStartCol = gridSize - word.length;
+        const col = Math.floor(Math.random() * (maxStartCol + 1));
+        for (let i = 0; i < word.length; i++) {
+          grid[row][col + i] = word[i];
         }
-        attempts++;
-      }
-    });
-
-    fillEmptySpaces();
-    renderGrid();
-    renderWordList(wordsInPuzzle);
-    checkGameCompletion();
-  }
-
-  function getRandomPosition(wordLength, direction) {
-    let row, col;
-    
-    switch(direction) {
-      case 'horizontal':
-        row = Math.floor(Math.random() * gridSize);
-        col = Math.floor(Math.random() * (gridSize - wordLength + 1));
-        break;
-      case 'horizontal-reverse':
-        row = Math.floor(Math.random() * gridSize);
-        col = Math.floor(Math.random() * (gridSize - wordLength + 1)) + wordLength - 1;
-        break;
-      case 'vertical':
-        row = Math.floor(Math.random() * (gridSize - wordLength + 1));
-        col = Math.floor(Math.random() * gridSize);
-        break;
-      case 'vertical-reverse':
-        row = Math.floor(Math.random() * (gridSize - wordLength + 1)) + wordLength - 1;
-        col = Math.floor(Math.random() * gridSize);
-        break;
-      case 'diagonal-down-right':
-        row = Math.floor(Math.random() * (gridSize - wordLength + 1));
-        col = Math.floor(Math.random() * (gridSize - wordLength + 1));
-        break;
-      case 'diagonal-down-left':
-        row = Math.floor(Math.random() * (gridSize - wordLength + 1));
-        col = Math.floor(Math.random() * (gridSize - wordLength + 1)) + wordLength - 1;
-        break;
-      default:
-        return null;
-    }
-    
-    return { row, col };
-  }
-
-  function canPlaceWord(word, row, col, direction) {
-    for (let i = 0; i < word.length; i++) {
-      const pos = getLetterPosition(row, col, i, direction);
-      if (pos.row < 0 || pos.row >= gridSize || pos.col < 0 || pos.col >= gridSize) {
-        return false;
-      }
-      if (puzzleGrid[pos.row][pos.col] && puzzleGrid[pos.row][pos.col] !== word[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function placeWord(word, row, col, direction) {
-    const positions = [];
-    for (let i = 0; i < word.length; i++) {
-      const pos = getLetterPosition(row, col, i, direction);
-      puzzleGrid[pos.row][pos.col] = word[i];
-      positions.push(pos);
-    }
-    wordPositions[word] = positions;
-  }
-
-  function getLetterPosition(startRow, startCol, letterIndex, direction) {
-    let row = startRow;
-    let col = startCol;
-    
-    switch(direction) {
-      case 'horizontal':
-        col += letterIndex;
-        break;
-      case 'horizontal-reverse':
-        col -= letterIndex;
-        break;
-      case 'vertical':
-        row += letterIndex;
-        break;
-      case 'vertical-reverse':
-        row -= letterIndex;
-        break;
-      case 'diagonal-down-right':
-        row += letterIndex;
-        col += letterIndex;
-        break;
-      case 'diagonal-down-left':
-        row += letterIndex;
-        col -= letterIndex;
-        break;
-    }
-    
-    return { row, col };
-  }
-
-  function fillEmptySpaces() {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        if (!puzzleGrid[r][c]) {
-          puzzleGrid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
-        }
-      }
-    }
-  }
-
-  function renderGrid() {
-    const puzzleEl = document.getElementById('puzzle');
-    puzzleEl.innerHTML = '';
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.textContent = puzzleGrid[r][c];
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        cell.addEventListener('mousedown', startSelect);
-        cell.addEventListener('mouseenter', extendSelect);
-        cell.addEventListener('mouseup', endSelect);
-        puzzleEl.appendChild(cell);
-      }
-    }
-  }
-
-  function renderWordList(words) {
-    const wordsGrid = document.getElementById('words-grid');
-    wordsGrid.innerHTML = '';
-    words.forEach(word => {
-      const div = document.createElement('div');
-      div.className = 'word-item';
-      div.id = 'word-' + word;
-      div.textContent = word;
-      if (foundWords.includes(word)) {
-        div.classList.add('found-word');
-      }
-      wordsGrid.appendChild(div);
-    });
-  }
-
-  function checkGameCompletion() {
-    if (foundWords.length === wordsInPuzzle.length && wordsInPuzzle.length > 0) {
-      document.getElementById('success-message').style.display = 'block';
-    } else {
-      document.getElementById('success-message').style.display = 'none';
-    }
-  }
-
-  let selecting = false;
-
-  function startSelect(e) {
-    selecting = true;
-    selectedPath = [e.target];
-    e.target.classList.add('selected');
-  }
-
-  function extendSelect(e) {
-    if (selecting && !selectedPath.includes(e.target)) {
-      // Check if the selection is in a straight line (horizontal, vertical, or diagonal)
-      if (selectedPath.length > 0) {
-        const lastCell = selectedPath[selectedPath.length - 1];
-        const currentCell = e.target;
-        
-        const lastRow = parseInt(lastCell.dataset.row);
-        const lastCol = parseInt(lastCell.dataset.col);
-        const currentRow = parseInt(currentCell.dataset.row);
-        const currentCol = parseInt(currentCell.dataset.col);
-        
-        // Check if it's a valid straight line selection
-        const rowDiff = currentRow - lastRow;
-        const colDiff = currentCol - lastCol;
-        
-        if (Math.abs(rowDiff) <= 1 && Math.abs(colDiff) <= 1 && (rowDiff !== 0 || colDiff !== 0)) {
-          selectedPath.push(e.target);
-          e.target.classList.add('selected');
-        }
-      }
-    }
-  }
-
-  function endSelect() {
-    selecting = false;
-    const selectedWord = selectedPath.map(cell => cell.textContent).join('');
-    const reversed = selectedWord.split('').reverse().join('');
-    const found = wordsInPuzzle.find(word => word === selectedWord || word === reversed);
-    
-    if (found && !foundWords.includes(found)) {
-      foundWords.push(found);
-      selectedPath.forEach(cell => {
-        cell.classList.remove('selected');
-        cell.classList.add('found');
       });
-      document.getElementById('word-' + found).classList.add('found-word');
-      checkGameCompletion();
-    } else {
-      selectedPath.forEach(cell => cell.classList.remove('selected'));
-    }
-    selectedPath = [];
-  }
 
-  function highlightHint() {
-    // Find the next unfound word
-    const unfoundWords = wordsInPuzzle.filter(word => !foundWords.includes(word));
-    if (unfoundWords.length === 0) {
-      alert("Congratulations! You've found all the words!");
-      return;
+      // Fill empty spaces with random letters
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          if (!grid[r][c]) {
+            grid[r][c] = randomLetter();
+          }
+        }
+      }
+
+      return grid;
     }
-    
-    const nextWord = unfoundWords[0];
-    const positions = wordPositions[nextWord];
-    
-    if (positions && positions.length > 0) {
-      // Highlight the first letter of the word
-      const firstPos = positions[0];
-      const cell = document.querySelector(`[data-row="${firstPos.row}"][data-col="${firstPos.col}"]`);
-      
-      if (cell) {
-        cell.classList.add('hint');
-        setTimeout(() => {
-          cell.classList.remove('hint');
-        }, 3000);
+
+    function renderGrid(grid) {
+      const container = document.getElementById("gridContainer");
+      container.innerHTML = "";
+      grid.forEach(row => {
+        row.forEach(cell => {
+          const div = document.createElement("div");
+          div.className = "cell";
+          div.textContent = cell;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function renderWordList(words) {
+      const list = document.getElementById("wordList");
+      list.innerHTML = "<strong>Find these words:</strong><br>" + words.map(word => `<span>${word}</span>`).join(", ");
+    }
+
+    function applyCustomWords() {
+      const input = document.getElementById("customWords").value;
+      wordsInPuzzle = input.split(",").map(w => w.trim().toUpperCase()).filter(w => w.length);
+      const grid = buildGrid(wordsInPuzzle);
+      renderGrid(grid);
+      renderWordList(wordsInPuzzle);
+    }
+
+    function checkAdminAccess() {
+      if (window.location.search.includes("admin=1")) {
+        document.getElementById("adminPanel").style.display = "block";
       }
     }
-  }
 
-  function generateCustomPuzzle() {
-    const wordInput = document.getElementById('words').value;
-    const customWords = wordInput.split(',').map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
-    if (customWords.length > 0) {
-      initPuzzle(customWords);
-      generateEmbedCode();
-    } else {
-      alert('Please enter at least one word.');
-    }
-  }
-
-  function generateEmbedCode() {
-    const currentHTML = document.documentElement.outerHTML;
-    // Remove admin panel from embed code
-    const embedHTML = currentHTML.replace(/<div id="admin-panel">[\s\S]*?<\/div>/, '');
-    document.getElementById('embed-code').value = embedHTML;
-  }
-
-  function copyEmbedCode() {
-    const embedCode = document.getElementById('embed-code');
-    embedCode.select();
-    document.execCommand('copy');
-    alert('Embed code copied to clipboard!');
-  }
-
-  // Check for admin parameter in URL
-  if (getQueryParam("admin") === "1") {
-    showAdminPanel();
-  }
-
-  // Initialize
-  initPuzzle();
-  generateEmbedCode();
-function downloadConfig() {
-  const getValue = (id) => {
-    const el = document.getElementById(id);
-    if (!el) {
-      console.error(`Missing element with id="${id}"`);
-      return "";
-    }
-    return el.value;
-  };
-
-  const config = {
-    theme: getValue("theme"),
-    category: getValue("category"),
-    month: getValue("month"),
-    year: getValue("year"),
-    words: getValue("words")
-      .split(',')
-      .map(w => w.trim().toUpperCase())
-      .filter(w => w.length > 0)
-  };
-
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `wordfind-${config.category}-${config.year}.json`;
-  link.click();
-}
-
-
-
-</script>
-
+    // Initialize
+    const grid = buildGrid(wordsInPuzzle);
+    renderGrid(grid);
+    renderWordList(wordsInPuzzle);
+    checkAdminAccess();
+  </script>
 </body>
 </html>
-
-Autofill
-
-;
