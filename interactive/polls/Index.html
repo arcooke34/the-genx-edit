@@ -1,1 +1,89 @@
-<!-- Repaired polling widget HTML content will be inserted here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GenX Poll Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; background: #f5f5f5; }
+    h1 { text-align: center; }
+    label { font-weight: bold; display: block; margin-top: 1rem; }
+    input[type="text"], textarea { width: 100%; padding: 0.5rem; margin-top: 0.25rem; font-size: 1rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem; }
+    #poll-preview { background: #fff; padding: 1rem; border: 1px solid #ccc; margin-top: 2rem; }
+    .poll-option { margin: 0.5rem 0; }
+    .results { margin-top: 1rem; }
+    .results div { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>GenX Poll Builder</h1>
+
+  <label for="poll-question">Poll Question:</label>
+  <input type="text" id="poll-question" placeholder="Type your question here" />
+
+  <label for="poll-options">Poll Options (one per line):</label>
+  <textarea id="poll-options" placeholder="Option 1\nOption 2\nOption 3"></textarea>
+
+  <button onclick="generatePoll()">Generate Poll</button>
+
+  <div id="poll-preview"></div>
+
+  <script>
+    let pollData = {};
+    const storageKey = "genx_poll_vote";
+
+    function generatePoll() {
+      const question = document.getElementById("poll-question").value.trim();
+      const options = document.getElementById("poll-options").value.trim().split("\\n").filter(Boolean);
+      if (!question || options.length < 2) {
+        alert("Please enter a question and at least two options.");
+        return;
+      }
+
+      pollData = {
+        question,
+        options,
+        votes: Array(options.length).fill(0)
+      };
+      localStorage.removeItem(storageKey);
+      renderPoll();
+    }
+
+    function renderPoll() {
+      const preview = document.getElementById("poll-preview");
+      preview.innerHTML = `<h3>${pollData.question}</h3>`;
+      if (localStorage.getItem(storageKey)) {
+        const voteIndex = parseInt(localStorage.getItem(storageKey), 10);
+        preview.innerHTML += `<p>Thanks for voting!</p>`;
+        showResults(preview);
+      } else {
+        pollData.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = "poll-option";
+          btn.textContent = opt;
+          btn.onclick = () => castVote(i);
+          preview.appendChild(btn);
+        });
+      }
+    }
+
+    function castVote(index) {
+      pollData.votes[index]++;
+      localStorage.setItem(storageKey, index);
+      renderPoll();
+    }
+
+    function showResults(container) {
+      const results = document.createElement("div");
+      results.className = "results";
+      pollData.options.forEach((opt, i) => {
+        const row = document.createElement("div");
+        row.textContent = `${opt}: ${pollData.votes[i]} vote(s)`;
+        results.appendChild(row);
+      });
+      container.appendChild(results);
+    }
+  </script>
+</body>
+</html>
