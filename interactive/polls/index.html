@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GenX Poll Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 0;
+      padding: 1rem;
+      background: white;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .poll-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border: 2px solid #000;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .poll-container h3 {
+      color: #000;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      text-align: center;
+      font-weight: 600;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.5rem;
+    }
+    
+    .poll-option { 
+      margin: 0.75rem 0; 
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      box-sizing: border-box;
+    }
+    
+    .poll-option:hover {
+      background: #000;
+      color: white;
+    }
+    
+    .results { 
+      margin-top: 1.5rem; 
+    }
+    
+    .results h4 {
+      color: #000;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .result-item { 
+      margin-bottom: 1rem; 
+      padding: 0.75rem;
+      background: #f8f8f8;
+      border-radius: 6px;
+      border: 1px solid #000;
+    }
+    
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #000;
+    }
+    
+    .result-bar {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #000;
+    }
+    
+    .result-fill {
+      height: 100%;
+      background: #000;
+      transition: width 0.8s ease;
+      border-radius: 3px;
+    }
+    
+    .vote-count {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    
+    .thank-you {
+      text-align: center;
+      color: #000;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      padding: 0.5rem;
+      border: 2px solid #000;
+      border-radius: 6px;
+      background: #f8f8f8;
+    }
+    
+    .reset-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .reset-btn:hover {
+      background: #000;
+      color: white;
+    }
+
+    /* Control Panel Styles */
+    .control-panel {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 2px solid #000;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      max-width: 400px;
+      width: 90%;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .control-panel h2 {
+      margin-top: 0;
+      color: #000;
+      font-size: 1.2rem;
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.5rem;
+    }
+
+    .control-panel label {
+      font-weight: 600;
+      display: block;
+      margin-top: 1rem;
+      color: #000;
+      font-size: 0.9rem;
+    }
+
+    .control-panel input[type="text"],
+    .control-panel textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      border: 2px solid #000;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .control-panel input[type="text"]:focus,
+    .control-panel textarea:focus {
+      outline: none;
+      border-color: #333;
+    }
+
+    .control-panel textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .control-panel button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .control-panel button:hover {
+      background: #000;
+      color: white;
+    }
+
+    .control-panel .close-btn {
+      background: #000;
+      color: white;
+      float: right;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      margin-top: 0;
+      margin-left: 0.5rem;
+    }
+
+    .control-panel .close-btn:hover {
+      background: #333;
+    }
+
+    /* Toggle Button */
+    .toggle-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    .toggle-btn:hover {
+      background: #000;
+      color: white;
+    }
+
+    /* Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    /* Hide poll when no data */
+    .no-poll {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="poll-container">
+    <div id="poll-display">
+      <div class="no-poll">No poll configured. Use the control panel to create a poll.</div>
+    </div>
+  </div>
+
+  <!-- Control Panel Toggle -->
+  <button class="toggle-btn" onclick="toggleControlPanel()">⚙️ Control Panel</button>
+
+  <!-- Overlay -->
+  <div class="overlay" onclick="closeControlPanel()"></div>
+
+  <!-- Control Panel -->
+  <div class="control-panel" id="control-panel">
+    <h2>Poll Configuration
+      <button class="close-btn" onclick="closeControlPanel()">×</button>
+    </h2>
+    
+    <label for="poll-question">Poll Question:</label>
+    <input type="text" id="poll-question" placeholder="What's your favorite 90s movie?" />
+    
+    <label for="poll-options">Poll Options (one per line):</label>
+    <textarea id="poll-options" placeholder="The Matrix&#10;Pulp Fiction&#10;Forrest Gump&#10;Titanic"></textarea>
+    
+    <button onclick="generatePoll()">Generate Poll</button>
+    <button onclick="clearAllData()">Clear All Data</button>
+  </div>
+
+  <script>
+    let pollData = {};
+    const storageKey = "genx_poll_data";
+    const voteKey = "genx_poll_vote";
+    
+    // Load existing poll on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      loadExistingPoll();
+    });
+    
+    function loadExistingPoll() {
+      // Try to load the most recent poll
+      const keys = Object.keys(localStorage).filter(key => key.startsWith(storageKey));
+      if (keys.length > 0) {
+        // Load the first poll found
+        const pollDataStr = localStorage.getItem(keys[0]);
+        if (pollDataStr) {
+          pollData = JSON.parse(pollDataStr);
+          pollData.storageKey = keys[0];
+          pollData.voteKey = keys[0].replace(storageKey, voteKey);
+          renderPoll();
+        }
+      }
+    }
+    
+    function toggleControlPanel() {
+      const panel = document.getElementById('control-panel');
+      const overlay = document.querySelector('.overlay');
+      
+      if (panel.style.display === 'none' || panel.style.display === '') {
+        panel.style.display = 'block';
+        overlay.style.display = 'block';
+        
+        // Pre-fill if poll exists
+        if (pollData.question) {
+          document.getElementById('poll-question').value = pollData.question;
+          document.getElementById('poll-options').value = pollData.options.join('\n');
+        }
+      } else {
+        closeControlPanel();
+      }
+    }
+    
+    function closeControlPanel() {
+      document.getElementById('control-panel').style.display = 'none';
+      document.querySelector('.overlay').style.display = 'none';
+    }
+    
+    function generatePoll() {
+      const question = document.getElementById("poll-question").value.trim();
+      const options = document.getElementById("poll-options").value.trim().split("\n").filter(Boolean);
+      
+      if (!question || options.length < 2) {
+        alert("Please enter a question and at least two options.");
+        return;
+      }
+      
+      // Create a unique poll ID based on question and options
+      const pollId = btoa(question + options.join("|")).replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+      const currentStorageKey = storageKey + "_" + pollId;
+      const currentVoteKey = voteKey + "_" + pollId;
+      
+      // Load existing poll data if it exists
+      const existingPollData = localStorage.getItem(currentStorageKey);
+      
+      if (existingPollData) {
+        pollData = JSON.parse(existingPollData);
+        pollData.storageKey = currentStorageKey;
+        pollData.voteKey = currentVoteKey;
+      } else {
+        pollData = {
+          question,
+          options,
+          votes: Array(options.length).fill(0),
+          storageKey: currentStorageKey,
+          voteKey: currentVoteKey
+        };
+        localStorage.setItem(currentStorageKey, JSON.stringify(pollData));
+      }
+      
+      renderPoll();
+      closeControlPanel();
+    }
+    
+    function renderPoll() {
+      const display = document.getElementById("poll-display");
+      
+      if (!pollData.question) {
+        display.innerHTML = '<div class="no-poll">No poll configured. Use the control panel to create a poll.</div>';
+        return;
+      }
+      
+      display.innerHTML = `<h3>${pollData.question}</h3>`;
+      
+      const userVote = localStorage.getItem(pollData.voteKey);
+      
+      if (userVote !== null) {
+        display.innerHTML += `<p class="thank-you">Thanks for voting!</p>`;
+        showResults(display, parseInt(userVote));
+      } else {
+        pollData.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = "poll-option";
+          btn.textContent = opt;
+          btn.onclick = () => castVote(i);
+          display.appendChild(btn);
+        });
+      }
+    }
+    
+    function castVote(index) {
+      if (localStorage.getItem(pollData.voteKey) !== null) return;
+      
+      pollData.votes[index]++;
+      
+      // Save updated poll data and user vote
+      localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+      localStorage.setItem(pollData.voteKey, index.toString());
+      
+      renderPoll();
+    }
+    
+    function showResults(container, userVoteIndex = null) {
+      const results = document.createElement("div");
+      results.className = "results";
+      
+      const totalVotes = pollData.votes.reduce((sum, votes) => sum + votes, 0);
+      
+      results.innerHTML = `<h4>Results (${totalVotes} vote${totalVotes !== 1 ? 's' : ''})</h4>`;
+      
+      pollData.options.forEach((opt, i) => {
+        const votes = pollData.votes[i];
+        const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        
+        const resultItem = document.createElement("div");
+        resultItem.className = "result-item";
+        
+        const isUserVote = userVoteIndex === i;
+        const voteLabel = isUserVote ? " (Your vote)" : "";
+        
+        resultItem.innerHTML = `
+          <div class="result-label">
+            <span>${opt}${voteLabel}</span>
+            <span class="vote-count">${percentage}% (${votes} vote${votes !== 1 ? 's' : ''})</span>
+          </div>
+          <div class="result-bar">
+            <div class="result-fill" style="width: ${percentage}%"></div>
+          </div>
+        `;
+        
+        results.appendChild(resultItem);
+      });
+      
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "reset-btn";
+      resetBtn.textContent = "Reset & Vote Again";
+      resetBtn.onclick = resetPoll;
+      results.appendChild(resetBtn);
+      
+      container.appendChild(results);
+    }
+    
+    function resetPoll() {
+      // Clear both poll data and user vote
+      localStorage.removeItem(pollData.storageKey);
+      localStorage.removeItem(pollData.voteKey);
+      
+      // Reset poll data
+      pollData.votes = Array(pollData.options.length).fill(0);
+      localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+      
+      renderPoll();
+    }
+    
+    function clearAllData() {
+      if (confirm("Are you sure you want to clear all poll data? This cannot be undone.")) {
+        // Clear all poll-related data
+        const keys = Object.keys(localStorage).filter(key => 
+          key.startsWith(storageKey) || key.startsWith(voteKey)
+        );
+        keys.forEach(key => localStorage.removeItem(key));
+        
+        // Reset display
+        pollData = {};
+        document.getElementById("poll-question").value = "";
+        document.getElementById("poll-options").value = "";
+        renderPoll();
+      }
+    }
+  </script>
+</body>
+</html>
