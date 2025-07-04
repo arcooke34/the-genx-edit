@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GenX Poll Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      max-width: 600px; 
+      margin: 2rem auto; 
+      padding: 1rem; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    
+    h1 { 
+      text-align: center; 
+      color: #4a5568;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    
+    label { 
+      font-weight: 600; 
+      display: block; 
+      margin-top: 1.5rem; 
+      color: #2d3748;
+      font-size: 1.1rem;
+    }
+    
+    input[type="text"], textarea { 
+      width: 100%; 
+      padding: 0.75rem; 
+      margin-top: 0.5rem; 
+      font-size: 1rem; 
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .generate-btn { 
+      margin-top: 1.5rem; 
+      padding: 0.75rem 2rem; 
+      font-size: 1rem; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    #poll-preview { 
+      background: rgba(255, 255, 255, 0.9); 
+      padding: 1.5rem; 
+      border: 1px solid #e2e8f0; 
+      margin-top: 2rem; 
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    #poll-preview h3 {
+      color: #2d3748;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    
+    .poll-option { 
+      margin: 0.75rem 0; 
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .poll-option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+    }
+    
+    .results { 
+      margin-top: 1.5rem; 
+    }
+    
+    .results h4 {
+      color: #2d3748;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    
+    .result-item { 
+      margin-bottom: 1rem; 
+      padding: 0.75rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    
+    .result-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .result-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.8s ease;
+      border-radius: 4px;
+    }
+    
+    .vote-count {
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+    
+    .thank-you {
+      text-align: center;
+      color: #38a169;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .reset-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #e53e3e;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .reset-btn:hover {
+      background: #c53030;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GenX Poll Builder</h1>
+    
+    <label for="poll-question">Poll Question:</label>
+    <input type="text" id="poll-question" placeholder="What's your favorite 90s movie?" />
+    
+    <label for="poll-options">Poll Options (one per line):</label>
+    <textarea id="poll-options" placeholder="The Matrix&#10;Pulp Fiction&#10;Forrest Gump&#10;Titanic"></textarea>
+    
+    <button class="generate-btn" onclick="generatePoll()">Generate Poll</button>
+    
+    <div id="poll-preview"></div>
+  </div>
+
+  <script>
+    let pollData = {};
+    const storageKey = "genx_poll_data";
+    const voteKey = "genx_poll_vote";
+    
+    function generatePoll() {
+      const question = document.getElementById("poll-question").value.trim();
+      const options = document.getElementById("poll-options").value.trim().split("\n").filter(Boolean);
+      
+      if (!question || options.length < 2) {
+        alert("Please enter a question and at least two options.");
+        return;
+      }
+      
+      // Create a unique poll ID based on question and options
+      const pollId = btoa(question + options.join("|")).replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+      const currentStorageKey = storageKey + "_" + pollId;
+      const currentVoteKey = voteKey + "_" + pollId;
+      
+      // Load existing poll data if it exists
+      const existingPollData = localStorage.getItem(currentStorageKey);
+      
+      if (existingPollData) {
+        pollData = JSON.parse(existingPollData);
+        pollData.storageKey = currentStorageKey;
+        pollData.voteKey = currentVoteKey;
+      } else {
+        pollData = {
+          question,
+          options,
+          votes: Array(options.length).fill(0),
+          storageKey: currentStorageKey,
+          voteKey: currentVoteKey
+        };
+        localStorage.setItem(currentStorageKey, JSON.stringify(pollData));
+      }
+      
+      renderPoll();
+    }
+    
+    function renderPoll() {
+      const preview = document.getElementById("poll-preview");
+      preview.innerHTML = `<h3>${pollData.question}</h3>`;
+      
+      const userVote = localStorage.getItem(pollData.voteKey);
+      
+      if (userVote !== null) {
+        preview.innerHTML += `<p class="thank-you">Thanks for voting!</p>`;
+        showResults(preview, parseInt(userVote));
+      } else {
+        pollData.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = "poll-option";
+          btn.textContent = opt;
+          btn.onclick = () => castVote(i);
+          preview.appendChild(btn);
+        });
+      }
+    }
+    
+    function castVote(index) {
+      if (localStorage.getItem(pollData.voteKey) !== null) return;
+      
+      pollData.votes[index]++;
+      
+      // Save updated poll data and user vote
+      localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+      localStorage.setItem(pollData.voteKey, index.toString());
+      
+      renderPoll();
+    }
+    
+    function showResults(container, userVoteIndex = null) {
+      const results = document.createElement("div");
+      results.className = "results";
+      
+      const totalVotes = pollData.votes.reduce((sum, votes) => sum + votes, 0);
+      
+      results.innerHTML = `<h4>Results (${totalVotes} vote${totalVotes !== 1 ? 's' : ''})</h4>`;
+      
+      pollData.options.forEach((opt, i) => {
+        const votes = pollData.votes[i];
+        const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        
+        const resultItem = document.createElement("div");
+        resultItem.className = "result-item";
+        
+        const isUserVote = userVoteIndex === i;
+        const voteLabel = isUserVote ? " (Your vote)" : "";
+        
+        resultItem.innerHTML = `
+          <div class="result-label">
+            <span>${opt}${voteLabel}</span>
+            <span class="vote-count">${percentage}% (${votes} vote${votes !== 1 ? 's' : ''})</span>
+          </div>
+          <div class="result-bar">
+            <div class="result-fill" style="width: ${percentage}%"></div>
+          </div>
+        `;
+        
+        results.appendChild(resultItem);
+      });
+      
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "reset-btn";
+      resetBtn.textContent = "Reset & Vote Again";
+      resetBtn.onclick = resetPoll;
+      results.appendChild(resetBtn);
+      
+      container.appendChild(results);
+    }
+    
+    function resetPoll() {
+      // Clear both poll data and user vote
+      localStorage.removeItem(pollData.storageKey);
+      localStorage.removeItem(pollData.voteKey);
+      
+      // Reset poll data
+      pollData.votes = Array(pollData.options.length).fill(0);
+      localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+      
+      renderPoll();
+    }
+  </script>
+</body>
+</html>
