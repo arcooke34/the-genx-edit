@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GenX Poll Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 0;
+      padding: 1rem;
+      background: white;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .poll-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border: 2px solid #000;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .poll-container h3 {
+      color: #000;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      text-align: center;
+      font-weight: 600;
+      border-bottom: 2px solid #000;
+      padding-bottom: 0.5rem;
+    }
+    
+    .poll-option { 
+      margin: 0.75rem 0; 
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      box-sizing: border-box;
+    }
+    
+    .poll-option:hover {
+      background: #000;
+      color: white;
+    }
+    
+    .results { 
+      margin-top: 1.5rem; 
+    }
+    
+    .results h4 {
+      color: #000;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .result-item { 
+      margin-bottom: 1rem; 
+      padding: 0.75rem;
+      background: #f8f8f8;
+      border-radius: 6px;
+      border: 1px solid #000;
+    }
+    
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #000;
+    }
+    
+    .result-bar {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #000;
+    }
+    
+    .result-fill {
+      height: 100%;
+      background: #000;
+      transition: width 0.8s ease;
+      border-radius: 3px;
+    }
+    
+    .vote-count {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    
+    .thank-you {
+      text-align: center;
+      color: #000;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      padding: 0.5rem;
+      border: 2px solid #000;
+      border-radius: 6px;
+      background: #f8f8f8;
+    }
+    
+    .reset-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      width: 100%;
+    }
+    
+    .reset-btn:hover {
+      background: #000;
+      color: white;
+    }
+
+    .no-poll {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 2rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      margin: 1rem 0;
+    }
+
+    .config-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      display: none; /* Hidden by default for newsletter use */
+    }
+
+    .config-section h4 {
+      margin-top: 0;
+      color: #000;
+    }
+
+    .config-section label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .config-section input,
+    .config-section textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 2px solid #000;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .config-section button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-right: 0.5rem;
+    }
+
+    .config-section button:hover {
+      background: #000;
+      color: white;
+    }
+
+    .setup-instructions {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #fff5f5;
+      border: 2px solid #ff6b6b;
+      border-radius: 6px;
+      display: none; /* Hidden by default for newsletter use */
+    }
+
+    .setup-instructions h4 {
+      color: #d63031;
+      margin-top: 0;
+    }
+
+    .setup-instructions ol {
+      margin-left: 1rem;
+    }
+
+    .setup-instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    .setup-instructions code {
+      background: #f1f1f1;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .admin-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: white;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      z-index: 1000;
+    }
+
+    .admin-toggle:hover {
+      background: #000;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin Toggle (hidden in iframe) -->
+  <button class="admin-toggle" onclick="toggleAdminMode()">Admin</button>
+
+  <div class="poll-container">
+    <div id="poll-display">
+      <div class="no-poll">Configure your poll below to get started.</div>
+    </div>
+    
+    <!-- Configuration Section -->
+    <div class="config-section" id="config-section">
+      <h4>Poll Configuration</h4>
+      
+      <label for="poll-question">Poll Question:</label>
+      <input type="text" id="poll-question" placeholder="What's your favorite 90s movie?" />
+      
+      <label for="poll-options">Poll Options (one per line):</label>
+      <textarea id="poll-options" placeholder="The Matrix&#10;Pulp Fiction&#10;Forrest Gump&#10;Titanic" rows="4"></textarea>
+      
+      <button onclick="generatePoll()">Create Poll</button>
+      <button onclick="clearAllData()">Clear All Data</button>
+    </div>
+
+    <!-- Setup Instructions -->
+    <div class="setup-instructions" id="setup-instructions">
+      <h4>🚨 Google Sheets Setup Required</h4>
+      <p>To enable vote tracking across all users, you need to connect this to Google Sheets:</p>
+      <ol>
+        <li>Go to <code>script.google.com</code></li>
+        <li>Create a new project</li>
+        <li>Delete the default code and paste the Google Apps Script code I provided</li>
+        <li>Replace <code>YOUR_SPREADSHEET_ID_HERE</code> with your actual Google Sheets ID</li>
+        <li>Deploy as a web app (Execute as: Me, Access: Anyone)</li>
+        <li>Copy the web app URL and paste it in the <code>GOOGLE_SCRIPT_URL</code> variable below</li>
+      </ol>
+      <p><strong>Current status:</strong> <span id="connection-status">Not connected (votes stored locally only)</span></p>
+    </div>
+  </div>
+
+  <script>
+    let pollData = {};
+    const storageKey = "genx_poll_data";
+    const voteKey = "genx_poll_vote";
+    
+    // 🔧 REPLACE THIS WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+    
+    // Check if we're in an iframe (for newsletter embedding)
+    const isInIframe = window.self !== window.top;
+    
+    // Check connection status on load
+    window.addEventListener('DOMContentLoaded', function() {
+      updateConnectionStatus();
+      loadExistingPoll();
+      
+      // Hide admin elements if in iframe
+      if (isInIframe) {
+        document.querySelector('.admin-toggle').style.display = 'none';
+      }
+    });
+    
+    function toggleAdminMode() {
+      const configSection = document.getElementById('config-section');
+      const setupInstructions = document.getElementById('setup-instructions');
+      
+      if (configSection.style.display === 'none' || configSection.style.display === '') {
+        configSection.style.display = 'block';
+        setupInstructions.style.display = 'block';
+      } else {
+        configSection.style.display = 'none';
+        setupInstructions.style.display = 'none';
+      }
+    }
+    
+    function updateConnectionStatus() {
+      const statusElement = document.getElementById('connection-status');
+      if (GOOGLE_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+        statusElement.textContent = 'Not connected (votes stored locally only)';
+        statusElement.style.color = '#d63031';
+      } else {
+        statusElement.textContent = 'Connected to Google Sheets';
+        statusElement.style.color = '#00b894';
+      }
+    }
+    
+    function loadExistingPoll() {
+      // Try to load the most recent poll
+      const keys = Object.keys(localStorage).filter(key => key.startsWith(storageKey));
+      if (keys.length > 0) {
+        const pollDataStr = localStorage.getItem(keys[0]);
+        if (pollDataStr) {
+          pollData = JSON.parse(pollDataStr);
+          pollData.storageKey = keys[0];
+          pollData.voteKey = keys[0].replace(storageKey, voteKey);
+          
+          // Pre-fill the form
+          document.getElementById('poll-question').value = pollData.question;
+          document.getElementById('poll-options').value = pollData.options.join('\n');
+          
+          // Load real vote data from Google Sheets
+          loadVoteDataFromSheets();
+        }
+      }
+    }
+    
+    async function loadVoteDataFromSheets() {
+      if (!pollData.question || GOOGLE_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+        renderPoll();
+        return;
+      }
+      
+      try {
+        const pollId = generatePollId(pollData.question, pollData.options);
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getVotes&pollId=${encodeURIComponent(pollId)}`);
+        const data = await response.json();
+        
+        if (data.success && data.votes) {
+          pollData.votes = data.votes;
+          localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+        }
+      } catch (error) {
+        console.log('Could not load vote data from Google Sheets, using local data');
+      }
+      
+      renderPoll();
+    }
+    
+    function generatePollId(question, options) {
+      return btoa(question + options.join("|")).replace(/[^a-zA-Z0-9]/g, "").substring(0, 16);
+    }
+    
+    function generatePoll() {
+      const question = document.getElementById("poll-question").value.trim();
+      const options = document.getElementById("poll-options").value.trim().split("\n").filter(Boolean);
+      
+      if (!question || options.length < 2) {
+        alert("Please enter a question and at least two options.");
+        return;
+      }
+      
+      // Create a unique poll ID based on question and options
+      const pollId = generatePollId(question, options);
+      const currentStorageKey = storageKey + "_" + pollId;
+      const currentVoteKey = voteKey + "_" + pollId;
+      
+      // Create new poll data
+      pollData = {
+        question,
+        options,
+        votes: Array(options.length).fill(0),
+        storageKey: currentStorageKey,
+        voteKey: currentVoteKey,
+        pollId: pollId
+      };
+      
+      localStorage.setItem(currentStorageKey, JSON.stringify(pollData));
+      
+      // Load real vote data from Google Sheets
+      loadVoteDataFromSheets();
+    }
+    
+    async function castVote(index) {
+      // Check if user already voted locally
+      if (localStorage.getItem(pollData.voteKey) !== null) return;
+      
+      const optionText = pollData.options[index];
+      const success = await sendVoteToSheets(pollData.pollId, pollData.question, index, optionText);
+      
+      if (success) {
+        // Mark as voted locally
+        localStorage.setItem(pollData.voteKey, index.toString());
+        
+        // Reload vote data from sheets to get updated totals
+        await loadVoteDataFromSheets();
+      } else {
+        // Fallback to local voting if Google Sheets fails
+        pollData.votes[index]++;
+        localStorage.setItem(pollData.storageKey, JSON.stringify(pollData));
+        localStorage.setItem(pollData.voteKey, index.toString());
+        renderPoll();
+      }
+    }
+    
+    async function sendVoteToSheets(pollId, question, optionIndex, optionText) {
+      if (GOOGLE_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+        console.log('Google Sheets not configured, using local storage');
+        return false;
+      }
+      
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'vote',
+            pollId: pollId,
+            question: question,
+            optionIndex: optionIndex,
+            optionText: optionText,
+            timestamp: new Date().toISOString()
+          })
+        });
+        
+        const data = await response.json();
+        return data.success;
+      } catch (error) {
+        console.error('Error sending vote to Google Sheets:', error);
+        return false;
+      }
+    }
+    
+    function renderPoll() {
+      const display = document.getElementById("poll-display");
+      
+      if (!pollData.question) {
+        display.innerHTML = '<div class="no-poll">Configure your poll below to get started.</div>';
+        return;
+      }
+      
+      display.innerHTML = `<h3>${pollData.question}</h3>`;
+      
+      const userVote = localStorage.getItem(pollData.voteKey);
+      
+      if (userVote !== null) {
+        display.innerHTML += `<p class="thank-you">Thanks for voting!</p>`;
+        showResults(display, parseInt(userVote));
+      } else {
+        // Show loading state if we're fetching from Google Sheets
+        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+          display.innerHTML += '<div class="loading">Loading current results...</div>';
+        }
+        
+        pollData.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = "poll-option";
+          btn.textContent = opt;
+          btn.onclick = () => castVote(i);
+          display.appendChild(btn);
+        });
+      }
+    }
+    
+    function showResults(container, userVoteIndex = null) {
+      const results = document.createElement("div");
+      results.className = "results";
+      
+      const totalVotes = pollData.votes.reduce((sum, votes) => sum + votes, 0);
+      
+      // Simple thank you message - no detailed results for regular users
+      results.innerHTML = `<div style="text-align: center; padding: 1rem; background: #f8f8f8; border-radius: 6px; margin-top: 1rem;">
+        <h4 style="margin-top: 0; color: #000;">Thanks for voting!</h4>
+        <p style="margin-bottom: 0; color: #666;">Your vote has been recorded.</p>
+      </div>`;
+      
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "reset-btn";
+      resetBtn.textContent = "Vote Again";
+      resetBtn.onclick = resetPoll;
+      results.appendChild(resetBtn);
+      
+      container.appendChild(results);
+    }
+    
+    function resetPoll() {
+      // Clear local vote only - keep Google Sheets data
+      localStorage.removeItem(pollData.voteKey);
+      renderPoll();
+    }
+    
+    function clearAllData() {
+      if (confirm("Are you sure you want to clear all local poll data? This will not affect Google Sheets data.")) {
+        // Clear all poll-related data locally
+        const keys = Object.keys(localStorage).filter(key => 
+          key.startsWith(storageKey) || key.startsWith(voteKey)
+        );
+        keys.forEach(key => localStorage.removeItem(key));
+        
+        // Reset display
+        pollData = {};
+        document.getElementById("poll-question").value = "";
+        document.getElementById("poll-options").value = "";
+        renderPoll();
+      }
+    }
+  </script>
+</body>
+</html>
